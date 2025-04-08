@@ -2,15 +2,15 @@
 add_action('admin_menu', 'bloobee_smartchat_admin_menu');
 
 function bloobee_smartchat_admin_menu() {
-    add_menu_page(
-        'Bloobee SmartChat Settings', // Page title
-        'Bloobee SmartChat', // Menu title
-        'manage_options', // Capability
-        'bloobee-smartchat', // Menu slug
-        'bloobee_smartchat_admin_page', // Function to display the page
-        'dashicons-format-chat', // Icon
-        30 // Position
-    );
+    $page_title = 'Bloobee SmartChat';
+    $menu_title = 'Bloobee SmartChat';
+    $capability = 'manage_options';
+    $menu_slug = 'bloobee-smartchat';
+    $callback = 'bloobee_smartchat_admin_page';
+    $icon = 'dashicons-format-chat';
+    $position = 30;
+    
+    add_menu_page($page_title, $menu_title, $capability, $menu_slug, $callback, $icon, $position);
 }
 
 // Create the admin page content
@@ -138,4 +138,4 @@ function bloobee_smartchat_activate() {
     if (!get_option('bloobee_smartchat_qa_pairs')) {
         add_option('bloobee_smartchat_qa_pairs', array());
     }
-} 
+}
