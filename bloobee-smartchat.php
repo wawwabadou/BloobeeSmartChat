@@ -117,7 +117,7 @@ class BloobeeSmartChat {
         // Register styles
         wp_register_style(
             'bloobee-smartchat-styles',
-            BLOOBEE_SMARTCHAT_URL . 'public/css/styles.css',
+            BLOOBEE_SMARTCHAT_URL . 'Public/css/styles.css',
             array(),
             BLOOBEE_SMARTCHAT_VERSION
         );
@@ -125,7 +125,7 @@ class BloobeeSmartChat {
         // Register scripts
         wp_register_script(
             'bloobee-smartchat-js',
-            BLOOBEE_SMARTCHAT_URL . 'public/js/chatbot.js',
+            BLOOBEE_SMARTCHAT_URL . 'Public/js/chatbot.js',
             array('jquery'),
             BLOOBEE_SMARTCHAT_VERSION,
             true
@@ -298,7 +298,7 @@ class BloobeeSmartChat {
      * Get template
      */
     private function get_template($template_name) {
-        $template_path = BLOOBEE_SMARTCHAT_DIR . 'templates/' . $template_name . '.php';
+        $template_path = BLOOBEE_SMARTCHAT_DIR . 'Templates/' . $template_name . '.php';
         
         if (file_exists($template_path)) {
             include $template_path;
