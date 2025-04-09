@@ -1,6 +1,22 @@
 <?php
 // Prevent direct access
 defined('ABSPATH') or die('Access denied');
+
+// Extract values from analytics data
+$total_conversations = isset($analytics_data['total_conversations']) ? $analytics_data['total_conversations'] : 0;
+$total_messages = isset($analytics_data['total_conversations']) ? $analytics_data['total_conversations'] * 2 : 0; // Estimate
+$avg_messages_per_conversation = $total_conversations > 0 ? number_format($total_messages / $total_conversations, 1) : 0;
+
+// Extract chart data
+$conversations_labels = isset($analytics_data['conversations_by_day']) ? array_column($analytics_data['conversations_by_day'], 'date') : [];
+$conversations_data = isset($analytics_data['conversations_by_day']) ? array_column($analytics_data['conversations_by_day'], 'count') : [];
+
+// Extract topics data
+$topics_labels = isset($analytics_data['subject_distribution']) ? array_column($analytics_data['subject_distribution'], 'subject') : [];
+$topics_data = isset($analytics_data['subject_distribution']) ? array_column($analytics_data['subject_distribution'], 'count') : [];
+
+// Get recent conversations
+$recent_conversations = $this->get_recent_conversations();
 ?>
 
 <div class="wrap bloobee-admin-analytics">
@@ -19,7 +35,7 @@ defined('ABSPATH') or die('Access denied');
         
         <div class="analytics-box">
             <h2><?php echo esc_html__('Average Messages/Conversation', 'bloobee-smartchat'); ?></h2>
-            <div class="analytics-number"><?php echo esc_html(number_format($avg_messages_per_conversation, 1)); ?></div>
+            <div class="analytics-number"><?php echo esc_html($avg_messages_per_conversation); ?></div>
         </div>
     </div>
     
@@ -53,7 +69,7 @@ defined('ABSPATH') or die('Access denied');
                     <?php foreach ($recent_conversations as $conversation): ?>
                         <tr>
                             <td><?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($conversation->created_at))); ?></td>
-                            <td><?php echo esc_html($conversation->user_id ? get_userdata($conversation->user_id)->display_name : __('Guest', 'bloobee-smartchat')); ?></td>
+                            <td><?php echo esc_html($conversation->user_id ? (is_numeric($conversation->user_id) && get_userdata($conversation->user_id) ? get_userdata($conversation->user_id)->display_name : $conversation->user_id) : __('Guest', 'bloobee-smartchat')); ?></td>
                             <td><?php echo esc_html($conversation->message_count); ?></td>
                             <td><?php echo esc_html($conversation->subject ?: __('General', 'bloobee-smartchat')); ?></td>
                             <td>

@@ -513,4 +513,24 @@ class Bloobee_Admin {
             $conversation_id
         ));
     }
+    
+    /**
+     * Get recent conversations 
+     */
+    public function get_recent_conversations($limit = 5) {
+        global $wpdb;
+        $table_conversations = $wpdb->prefix . 'bloobee_conversations';
+        
+        // Get conversations grouped by user and date
+        $conversations = $wpdb->get_results($wpdb->prepare(
+            "SELECT id, user_id, subject, created_at, COUNT(*) as message_count
+            FROM $table_conversations
+            GROUP BY user_id, DATE(created_at)
+            ORDER BY created_at DESC
+            LIMIT %d",
+            $limit
+        ));
+        
+        return $conversations;
+    }
 }
