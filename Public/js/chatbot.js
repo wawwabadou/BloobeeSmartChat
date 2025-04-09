@@ -28,7 +28,10 @@
         $chatWindow = $('<div class="bloobee-chat-window"></div>');
         
         // Create chat header
-        const $chatHeader = $('<div class="bloobee-chat-header"><h3 class="bloobee-chat-title">' + bloobeeAjax.settings.chat_title + '</h3><button class="bloobee-chat-close">×</button></div>');
+        // Add staff status indicator based on settings
+        const staffStatus = bloobeeAjax.settings.staff_status || 'offline';
+        const $statusIndicator = '<span class="bloobee-staff-status ' + staffStatus + '"></span>';
+        const $chatHeader = $('<div class="bloobee-chat-header"><h3 class="bloobee-chat-title">' + $statusIndicator + bloobeeAjax.settings.chat_title + '</h3><button class="bloobee-chat-close">×</button></div>');
         
         // Create chat body
         $chatBody = $('<div class="bloobee-chat-body"></div>');
@@ -118,11 +121,11 @@
         chatOpen = !chatOpen;
         
         if (chatOpen) {
-            $chatWindow.addClass('open');
+            $chatWindow.addClass('show');
             $chatInput.focus();
             trackEvent('chat_opened');
         } else {
-            $chatWindow.removeClass('open');
+            $chatWindow.removeClass('show');
             trackEvent('chat_closed');
         }
     }
@@ -172,16 +175,33 @@
                         playMessageSound();
                     }
                 } else {
-                    // Add error message
-                    addBotMessage('Sorry, I encountered an error. Please try again later.');
+                    // Add error message (from backend response)
+                    const errorMessage = response.data && response.data.error ? response.data.error : 'Sorry, I encountered an error. Please try again later.';
+                    addBotMessage(errorMessage);
+                    // Log the backend-reported error as an event as well
+                    trackEvent('backend_error', { 
+                        message: message, 
+                        subject: selectedSubject, 
+                        error: errorMessage
+                    });
                 }
             },
-            error: function() {
+            error: function(jqXHR, textStatus, errorThrown) { // Modified error handler
                 // Hide typing indicator
                 hideTypingIndicator();
                 
-                // Add error message
-                addBotMessage('Sorry, I encountered an error. Please try again later.');
+                // Add generic error message to chat
+                const genericErrorMessage = 'Sorry, there was a connection problem. Please try again later.';
+                addBotMessage(genericErrorMessage);
+                
+                // Track the AJAX error
+                trackEvent('ajax_error', {
+                    message: message,
+                    subject: selectedSubject,
+                    status: textStatus,
+                    error: errorThrown,
+                    response: jqXHR.responseText // Include response text if available
+                });
             }
         });
         

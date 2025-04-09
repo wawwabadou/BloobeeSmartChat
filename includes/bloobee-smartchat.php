@@ -34,6 +34,12 @@ class Bloobee_Agent {
      * Get response for a given message
      */
     public function get_response($message, $subject = '') {
+        // Check if IP is blocked
+        $ip_blocker = Bloobee_IP_Blocker::get_instance();
+        if ($ip_blocker->is_current_ip_blocked()) {
+            return __('Access denied. Your IP address has been blocked from using this service.', 'bloobee-smartchat');
+        }
+
         // Check if sentiment analysis is enabled
         $settings = Bloobee_Settings::get_instance();
         $enable_sentiment = $settings->get_option('enable_sentiment_analysis', true);

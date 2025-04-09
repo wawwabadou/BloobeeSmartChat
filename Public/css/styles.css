@@ -1,206 +1,208 @@
 /* Bloobee SmartChat Styles */
 
+:root {
+    --bloobee-primary-color: #0084ff;
+    --bloobee-secondary-color: #f1f0f0; 
+    --bloobee-text-color: #000;
+    --bloobee-bg-color: #fff;
+    --bloobee-user-msg-bg: #0084ff;
+    --bloobee-user-msg-text: #fff;
+    --bloobee-bot-msg-bg: #f1f0f0;
+    --bloobee-bot-msg-text: #000;
+}
+
 /* Chat container */
 .bloobee-chat-container {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 9999;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* Chat icon button */
 .bloobee-chat-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
     width: 60px;
     height: 60px;
+    background: var(--bloobee-primary-color);
     border-radius: 50%;
-    background-color: var(--bloobee-primary-color, #0084ff);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+    z-index: 999998;
+    padding: 0;
+    border: none;
 }
 
-/* Cool hover effect */
 .bloobee-chat-button:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.bloobee-chat-button.new-message {
+    animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
 }
 
 /* Chat icon */
 .bloobee-chat-icon {
-    width: 35px;
-    height: 35px;
+    width: 36px; /* Adjust size as needed */
+    height: 36px;
     object-fit: contain;
-    transition: transform 0.3s ease;
+    border-radius: 50%; /* Keep if logo is circular */
 }
 
-/* Animation for the chat icon */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* Apply animation to the chat icon */
-.bloobee-chat-button .bloobee-chat-icon {
-    animation: pulse 2s infinite;
+/* Notification bubble */
+.bloobee-notification {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
 }
 
 /* Chat window */
 .bloobee-chat-window {
-    position: absolute;
-    bottom: 75px;
-    right: 0;
-    width: 350px;
-    height: 450px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
-    display: none;
+    position: fixed;
+    bottom: 90px; /* Above the button */
+    right: 20px;
+    width: 370px; /* Slightly wider */
+    height: 500px; /* Slightly taller */
+    background: var(--bloobee-bg-color);
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+    display: none; /* Hidden by default */
     flex-direction: column;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    transform-origin: bottom right;
+    z-index: 999999;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Animation for opening the chat window */
-@keyframes scaleUp {
-    0% {
-        transform: scale(0.5);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* Apply animation when chat window is visible */
-.bloobee-chat-window.open {
+.bloobee-chat-window.show {
     display: flex;
-    animation: scaleUp 0.3s forwards;
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
 /* Chat header */
 .bloobee-chat-header {
-    background-color: var(--bloobee-primary-color, #0084ff);
+    background: var(--bloobee-primary-color);
     color: white;
-    padding: 15px;
+    padding: 15px 20px;
+    font-weight: 600;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    flex-shrink: 0;
 }
 
 .bloobee-chat-title {
-    font-weight: 600;
-    font-size: 16px;
     margin: 0;
+    font-size: 16px;
 }
 
 .bloobee-chat-close {
     background: none;
     border: none;
-    color: white;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 22px;
     cursor: pointer;
-    font-size: 18px;
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
+    padding: 0 5px;
+    line-height: 1;
 }
-
 .bloobee-chat-close:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
 }
 
-/* Chat body */
+/* Chat body (messages area) */
 .bloobee-chat-body {
     flex: 1;
-    padding: 15px;
+    padding: 20px 20px 10px 20px;
     overflow-y: auto;
-    background-color: #f5f5f5;
+    background: var(--bloobee-bg-color);
     display: flex;
     flex-direction: column;
 }
 
-/* Message bubbles */
+/* Styling for scrollbar (optional) */
+.bloobee-chat-body::-webkit-scrollbar {
+    width: 6px;
+}
+.bloobee-chat-body::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+/* Message container */
 .bloobee-message {
-    max-width: 80%;
-    margin-bottom: 10px;
-    padding: 10px 15px;
-    border-radius: 18px;
-    word-wrap: break-word;
-    position: relative;
-    animation: fadeIn 0.3s forwards;
-    opacity: 0;
+    margin-bottom: 15px;
+    max-width: 85%;
+    display: flex;
+    flex-direction: column;
 }
 
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
+/* Bot messages */
 .bloobee-message-bot {
     align-self: flex-start;
-    background-color: var(--bloobee-secondary-color, #f1f0f0);
-    color: #333;
-    border-bottom-left-radius: 5px;
+    background: var(--bloobee-bot-msg-bg);
+    color: var(--bloobee-bot-msg-text);
+    border-radius: 18px 18px 18px 5px;
+    padding: 10px 15px;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 14px;
 }
 
+/* User messages */
 .bloobee-message-user {
     align-self: flex-end;
-    background-color: var(--bloobee-primary-color, #0084ff);
-    color: white;
-    border-bottom-right-radius: 5px;
+    background: var(--bloobee-user-msg-bg);
+    color: var(--bloobee-user-msg-text);
+    border-radius: 18px 18px 5px 18px;
+    padding: 10px 15px;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 14px;
 }
 
 /* Typing indicator */
 .bloobee-typing {
-    display: flex;
-    align-items: center;
     align-self: flex-start;
-    background-color: var(--bloobee-secondary-color, #f1f0f0);
-    padding: 10px 15px;
-    border-radius: 18px;
-    border-bottom-left-radius: 5px;
-    margin-bottom: 10px;
+    background: var(--bloobee-bot-msg-bg);
+    border-radius: 18px 18px 18px 5px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
 }
 
 .bloobee-typing-dot {
+    display: inline-block;
     width: 8px;
     height: 8px;
-    background-color: #666;
+    background: #aaa;
     border-radius: 50%;
-    margin: 0 2px;
-    display: inline-block;
-    animation: typingAnimation 1.2s infinite;
-}
-
-.bloobee-typing-dot:nth-child(1) {
-    animation-delay: 0s;
+    margin-right: 5px;
+    animation: typing 1.2s infinite ease-in-out;
 }
 
 .bloobee-typing-dot:nth-child(2) {
@@ -209,72 +211,28 @@
 
 .bloobee-typing-dot:nth-child(3) {
     animation-delay: 0.4s;
+    margin-right: 0;
 }
 
-@keyframes typingAnimation {
-    0% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-5px);
-    }
-    100% {
-        transform: translateY(0);
-    }
+@keyframes typing {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(-3px); opacity: 1; }
 }
 
-/* Chat footer */
-.bloobee-chat-footer {
-    padding: 10px 15px;
-    background-color: #fff;
-    border-top: 1px solid #e0e0e0;
-    display: flex;
-    align-items: center;
-}
-
-.bloobee-chat-input {
-    flex: 1;
-    border: 1px solid #e0e0e0;
-    border-radius: 20px;
-    padding: 8px 15px;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-
-.bloobee-chat-input:focus {
-    border-color: var(--bloobee-primary-color, #0084ff);
-}
-
-.bloobee-chat-send {
-    background-color: var(--bloobee-primary-color, #0084ff);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    margin-left: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
-}
-
-.bloobee-chat-send:hover {
-    background-color: #006fd6;
-}
-
-/* Subject selection */
+/* Subject selector */
 .bloobee-subject-selector {
+    margin-bottom: 15px;
+    background: #f9f9f9;
     padding: 15px;
-    background-color: #fff;
+    border-radius: 10px;
+    border: 1px solid #eee;
 }
 
 .bloobee-subject-title {
     font-size: 14px;
+    color: #555;
     margin-bottom: 10px;
-    color: #333;
+    font-weight: 500;
 }
 
 .bloobee-subject-options {
@@ -284,83 +242,122 @@
 }
 
 .bloobee-subject-option {
-    background-color: var(--bloobee-secondary-color, #f1f0f0);
-    color: #333;
-    border: none;
-    border-radius: 16px;
-    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 15px;
     font-size: 13px;
     cursor: pointer;
     transition: all 0.2s ease;
+    color: #333;
 }
 
 .bloobee-subject-option:hover {
-    background-color: #e0e0e0;
+    background: #eee;
+    border-color: #ccc;
 }
 
 .bloobee-subject-option.selected {
-    background-color: var(--bloobee-primary-color, #0084ff);
+    background: var(--bloobee-primary-color);
     color: white;
+    border-color: var(--bloobee-primary-color);
+    font-weight: 500;
 }
 
-/* New notification indicator */
-.bloobee-notification {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 18px;
-    height: 18px;
-    background-color: #ff3b30;
-    border-radius: 50%;
+/* Chat footer */
+.bloobee-chat-footer {
+    padding: 15px 20px;
+    background: var(--bloobee-bg-color);
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.bloobee-chat-input {
+    flex: 1;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    background: #f1f0f0;
+    margin-right: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: background 0.2s ease;
+}
+
+.bloobee-chat-input:focus {
+    background: #e8e8e8;
+}
+
+.bloobee-chat-send {
+    background: var(--bloobee-primary-color);
+    border: none;
+    padding: 0;
+    cursor: pointer;
     color: white;
-    font-size: 12px;
-    font-weight: bold;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transform: scale(0);
-    animation: notificationPop 0.3s forwards;
+    transition: background 0.2s ease;
 }
 
-@keyframes notificationPop {
-    0% {
-        opacity: 0;
-        transform: scale(0);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.2);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+.bloobee-chat-send:hover {
+    background: darken(var(--bloobee-primary-color), 10%);
+}
+
+.bloobee-chat-send svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Staff status indicator (Optional - Add if needed) */
+.bloobee-staff-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    border: 1px solid #fff; /* For visibility on colored headers */
+}
+
+.bloobee-staff-status.online {
+    background-color: #2ecc71; /* Green */
+}
+
+.bloobee-staff-status.offline {
+    background-color: #e74c3c; /* Red */
+}
+
+/* Add staff status to header */
+.bloobee-chat-header .bloobee-chat-title {
+    display: flex;
+    align-items: center;
 }
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
     .bloobee-chat-window {
-        width: calc(100vw - 40px);
-        height: 60vh;
-        bottom: 75px;
+        width: calc(100% - 20px); /* Full width with small margins */
+        height: calc(100% - 20px); /* Full height with small margins */
+        bottom: 10px;
+        right: 10px;
+        border-radius: 10px; /* Slightly less round */
     }
-}
 
-/* Animation when new messages arrive */
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
+    .bloobee-chat-button {
+        bottom: 10px;
+        right: 10px;
+        width: 50px;
+        height: 50px;
     }
-    40% {
-        transform: translateY(-10px);
+    .bloobee-chat-icon {
+        width: 30px;
+        height: 30px;
     }
-    60% {
-        transform: translateY(-5px);
-    }
-}
-
-.bloobee-chat-button.new-message {
-    animation: bounce 1s;
 } 

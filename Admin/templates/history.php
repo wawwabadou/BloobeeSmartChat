@@ -12,12 +12,12 @@ defined('ABSPATH') or die('Access denied');
         </div>
     <?php endif; ?>
     
-    <?php if (isset($_GET['conversation']) && !empty($_GET['conversation'])): ?>
-        <?php 
+    <?php if (isset($_GET['conversation']) && !empty($_GET['conversation'])):
+        // Detailed Conversation View
         $conversation_id = intval($_GET['conversation']);
         $conversation_messages = $this->get_conversation_messages($conversation_id);
         $conversation_info = $this->get_conversation_info($conversation_id);
-        ?>
+    ?>
         
         <div class="conversation-header">
             <a href="<?php echo esc_url(admin_url('admin.php?page=bloobee-history')); ?>" class="button">&larr; <?php echo esc_html__('Back to All Conversations', 'bloobee-smartchat'); ?></a>
@@ -32,19 +32,36 @@ defined('ABSPATH') or die('Access denied');
                         <strong><?php echo esc_html__('User:', 'bloobee-smartchat'); ?></strong> 
                         <?php echo esc_html($conversation_info->user_id ? (is_numeric($conversation_info->user_id) && get_userdata($conversation_info->user_id) ? get_userdata($conversation_info->user_id)->display_name : $conversation_info->user_id) : __('Guest', 'bloobee-smartchat')); ?>
                     </p>
-                    <?php if (!empty($conversation_info->subject)): ?>
+                    <p>
+                        <strong><?php echo esc_html__('IP Address:', 'bloobee-smartchat'); ?></strong> 
+                        <?php echo esc_html($conversation_info->ip_address); ?>
+                    </p>
+                    <?php if (!empty($conversation_info->subject)):
+                    ?>
                         <p>
                             <strong><?php echo esc_html__('Subject:', 'bloobee-smartchat'); ?></strong> 
-                            <?php echo esc_html($conversation_info->subject); ?>
+                            <?php echo esc_html($conversation_info->subject);
+                            ?>
+                        </p>
+                    <?php endif;
+                    ?>
+                    <?php if (!empty($conversation_info->error_message)):
+                    ?>
+                        <p class="conversation-error">
+                            <strong><?php echo esc_html__('Error:', 'bloobee-smartchat'); ?></strong> 
+                            <span style="color: red;"><?php echo esc_html($conversation_info->error_message); ?></span>
                         </p>
                     <?php endif; ?>
                 </div>
-            <?php endif; ?>
+            <?php endif;
+            ?>
         </div>
         
         <div class="conversation-messages">
-            <?php if (!empty($conversation_messages)): ?>
-                <?php foreach ($conversation_messages as $message): ?>
+            <?php if (!empty($conversation_messages)):
+                ?>
+                <?php foreach ($conversation_messages as $message):
+                    ?>
                     <div class="message <?php echo esc_attr($message->is_bot ? 'bot-message' : 'user-message'); ?>">
                         <div class="message-header">
                             <span class="message-sender">
@@ -57,17 +74,22 @@ defined('ABSPATH') or die('Access denied');
                                 ?>
                             </span>
                             <span class="message-time">
-                                <?php echo esc_html(date_i18n(get_option('time_format'), strtotime($message->created_at))); ?>
+                                <?php echo esc_html(date_i18n(get_option('time_format'), strtotime($message->created_at)));
+                                ?>
                             </span>
                         </div>
                         <div class="message-content">
-                            <?php echo wp_kses_post(nl2br($message->message)); ?>
+                            <?php echo wp_kses_post(nl2br($message->message));
+                            ?>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
+                <?php endforeach;
+                ?>
+            <?php else:
+                ?>
                 <p class="no-messages"><?php echo esc_html__('No messages found for this conversation.', 'bloobee-smartchat'); ?></p>
-            <?php endif; ?>
+            <?php endif;
+            ?>
         </div>
         
         <div class="conversation-actions">
@@ -86,6 +108,7 @@ defined('ABSPATH') or die('Access denied');
                 var transcript = "Conversation ID: " + conversationInfo.id + "\n";
                 transcript += "Date: " + conversationInfo.created_at + "\n";
                 transcript += "User: " + (conversationInfo.user_id ? "<?php echo esc_js($conversation_info->user_id ? (is_numeric($conversation_info->user_id) && get_userdata($conversation_info->user_id) ? get_userdata($conversation_info->user_id)->display_name : $conversation_info->user_id) : __('Guest', 'bloobee-smartchat')); ?>" : "Guest") + "\n";
+                transcript += "IP Address: " + conversationInfo.ip_address + "\n";
                 if (conversationInfo.subject) {
                     transcript += "Subject: " + conversationInfo.subject + "\n";
                 }
@@ -114,8 +137,8 @@ defined('ABSPATH') or die('Access denied');
         });
         </script>
         
-    <?php else: ?>
-        <?php 
+    <?php else:
+        // List View
         // Get all conversations
         $conversations = $this->get_all_conversations();
         
@@ -143,17 +166,22 @@ defined('ABSPATH') or die('Access denied');
                     <th><?php echo esc_html__('ID', 'bloobee-smartchat'); ?></th>
                     <th><?php echo esc_html__('Date', 'bloobee-smartchat'); ?></th>
                     <th><?php echo esc_html__('User', 'bloobee-smartchat'); ?></th>
+                    <th><?php echo esc_html__('IP Address', 'bloobee-smartchat'); ?></th>
                     <th><?php echo esc_html__('Messages', 'bloobee-smartchat'); ?></th>
                     <th><?php echo esc_html__('Subject', 'bloobee-smartchat'); ?></th>
                     <th><?php echo esc_html__('Actions', 'bloobee-smartchat'); ?></th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($conversations)): ?>
-                    <?php foreach ($conversations as $conversation): ?>
+                <?php if (!empty($conversations)):
+                    ?>
+                    <?php foreach ($conversations as $conversation):
+                        ?>
                         <tr>
-                            <td><?php echo esc_html($conversation->id); ?></td>
-                            <td><?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($conversation->created_at))); ?></td>
+                            <td><?php echo esc_html($conversation->id);
+                            ?></td>
+                            <td><?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($conversation->created_at)));
+                            ?></td>
                             <td><?php 
                                 $user_id = $conversation->user_id;
                                 if (is_numeric($user_id) && $user_id > 0) {
@@ -163,23 +191,30 @@ defined('ABSPATH') or die('Access denied');
                                     echo esc_html($user_id) ?: esc_html__('Guest', 'bloobee-smartchat');
                                 }
                             ?></td>
-                            <td><?php echo esc_html($conversation->message_count); ?></td>
-                            <td><?php echo esc_html($conversation->subject ?: __('General', 'bloobee-smartchat')); ?></td>
+                            <td><?php echo esc_html($conversation->ip_address); ?></td>
+                            <td><?php echo esc_html($conversation->message_count);
+                            ?></td>
+                            <td><?php echo esc_html($conversation->subject ?: __('General', 'bloobee-smartchat'));
+                            ?></td>
                             <td>
                                 <a href="<?php echo esc_url(admin_url('admin.php?page=bloobee-history&conversation=' . $conversation->id)); ?>" class="button button-small"><?php echo esc_html__('View', 'bloobee-smartchat'); ?></a>
                                 <a href="<?php echo esc_url(admin_url('admin.php?page=bloobee-history&action=delete&conversation=' . $conversation->id . '&_wpnonce=' . wp_create_nonce('delete_conversation'))); ?>" class="button button-small" onclick="return confirm('<?php echo esc_js(__('Are you sure you want to delete this conversation?', 'bloobee-smartchat')); ?>');"><?php echo esc_html__('Delete', 'bloobee-smartchat'); ?></a>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
+                    <?php endforeach;
+                    ?>
+                <?php else:
+                    ?>
                     <tr>
-                        <td colspan="6"><?php echo esc_html__('No conversations found.', 'bloobee-smartchat'); ?></td>
+                        <td colspan="7"><?php echo esc_html__('No conversations found.', 'bloobee-smartchat'); ?></td>
                     </tr>
-                <?php endif; ?>
+                <?php endif;
+                ?>
             </tbody>
         </table>
         
-        <?php if ($total_pages > 1): ?>
+        <?php if ($total_pages > 1):
+            ?>
             <div class="tablenav">
                 <div class="tablenav-pages">
                     <span class="displaying-num">
@@ -216,6 +251,8 @@ defined('ABSPATH') or die('Access denied');
                     </span>
                 </div>
             </div>
-        <?php endif; ?>
-    <?php endif; ?>
+        <?php endif;
+        ?>
+    <?php endif;
+    ?>
 </div> 

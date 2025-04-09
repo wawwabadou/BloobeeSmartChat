@@ -42,12 +42,12 @@ $recent_conversations = $this->get_recent_conversations();
     <div class="analytics-charts">
         <div class="analytics-chart-container">
             <h2><?php echo esc_html__('Conversations by Day', 'bloobee-smartchat'); ?></h2>
-            <canvas id="conversations-chart" width="400" height="200"></canvas>
+            <canvas id="conversations-chart"></canvas>
         </div>
         
         <div class="analytics-chart-container">
             <h2><?php echo esc_html__('Popular Topics', 'bloobee-smartchat'); ?></h2>
-            <canvas id="topics-chart" width="400" height="200"></canvas>
+            <canvas id="topics-chart"></canvas>
         </div>
     </div>
     
@@ -106,6 +106,8 @@ jQuery(document).ready(function($) {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true
@@ -139,6 +141,10 @@ jQuery(document).ready(function($) {
                 ],
                 borderWidth: 1
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
 });

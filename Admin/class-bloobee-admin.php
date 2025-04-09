@@ -435,34 +435,24 @@ class Bloobee_Admin {
     }
 
     /**
-     * Get all conversations
+     * Get all conversations for history view
      */
-    public function get_all_conversations() {
+    public function get_all_conversations($search_term = '') {
         global $wpdb;
         $table_conversations = $wpdb->prefix . 'bloobee_conversations';
         
-        // Check if a search term is provided
-        if (isset($_GET['s']) && !empty($_GET['s'])) {
-            $search_term = '%' . $wpdb->esc_like($_GET['s']) . '%';
-            $conversations = $wpdb->get_results($wpdb->prepare(
-                "SELECT id, user_id, subject, created_at, COUNT(*) as message_count
-                FROM $table_conversations
-                WHERE user_message LIKE %s OR bot_response LIKE %s
-                GROUP BY user_id, DATE(created_at)
-                ORDER BY created_at DESC",
-                $search_term, $search_term
-            ));
-        } else {
-            // Get conversations grouped by user and date
-            $conversations = $wpdb->get_results(
-                "SELECT id, user_id, subject, created_at, COUNT(*) as message_count
-                FROM $table_conversations
-                GROUP BY user_id, DATE(created_at)
-                ORDER BY created_at DESC"
-            );
+        $query = "SELECT c.id, c.user_id, c.subject, c.ip_address, c.created_at, COUNT(c.id) as message_count 
+                  FROM {$table_conversations} c";
+        
+        if (!empty($search_term)) {
+            $search_like = '%' . $wpdb->esc_like($search_term) . '%';
+            $query .= $wpdb->prepare(" WHERE c.user_message LIKE %s OR c.bot_response LIKE %s OR c.user_id LIKE %s OR c.subject LIKE %s OR c.ip_address LIKE %s", 
+                                       $search_like, $search_like, $search_like, $search_like, $search_like);
         }
         
-        return $conversations;
+        $query .= " GROUP BY c.id ORDER BY c.created_at DESC";
+        
+        return $wpdb->get_results($query);
     }
     
     /**

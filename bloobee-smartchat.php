@@ -73,6 +73,10 @@ class BloobeeSmartChat {
         if (is_admin()) {
             require_once BLOOBEE_SMARTCHAT_DIR . 'Admin/class-bloobee-admin.php';
         }
+
+        // Initialize IP blocking
+        require_once BLOOBEE_SMARTCHAT_DIR . 'includes/class-bloobee-ip-blocker.php';
+        require_once BLOOBEE_SMARTCHAT_DIR . 'includes/admin/class-bloobee-admin-ip-blocker.php';
     }
 
     /**
@@ -108,6 +112,14 @@ class BloobeeSmartChat {
         if ($settings->get_option('display_on_all_pages', true)) {
             add_action('wp_footer', array($this, 'display_chatbot'));
         }
+
+        // Initialize admin IP blocker
+        if (is_admin()) {
+            Bloobee_Admin_IP_Blocker::get_instance();
+        }
+
+        // Initialize activity tracking
+        $this->init_activity_tracking();
     }
 
     /**
@@ -156,7 +168,7 @@ class BloobeeSmartChat {
             'secondary_color' => $secondary_color,
             'chat_title' => $chat_title,
             'welcome_message' => $welcome_message,
-            'chat_icon_url' => $settings->get_option('chat_icon_url', BLOOBEE_SMARTCHAT_URL . 'public/images/chat-icon.png'),
+            'chat_icon_url' => $settings->get_option('chat_icon_url', BLOOBEE_SMARTCHAT_URL . 'bloobee.png'),
             'enable_typing_indicator' => $settings->get_option('enable_typing_indicator', true),
             'typing_delay' => $settings->get_option('typing_delay', 1000),
             'auto_open' => $settings->get_option('auto_open', false),
@@ -167,7 +179,8 @@ class BloobeeSmartChat {
             'enable_multilingual' => $settings->get_option('enable_multilingual', true),
             'language' => $settings->get_option('language', 'auto'),
             'qa_pairs' => $this->get_qa_pairs(),
-            'subjects' => $this->get_subjects()
+            'subjects' => $this->get_subjects(),
+            'staff_status' => $this->get_staff_status()
         );
     }
 
@@ -188,36 +201,97 @@ class BloobeeSmartChat {
     }
 
     /**
+     * Get staff online/offline status
+     * Checks if any user with specified roles has been active recently.
+     */
+    private function get_staff_status() {
+        // Define roles considered as staff
+        $staff_roles = apply_filters('bloobee_staff_roles', ['administrator', 'editor']); 
+        // Define the recent activity threshold (in minutes)
+        $threshold_minutes = apply_filters('bloobee_staff_activity_threshold', 15);
+        
+        $online = false;
+        $users = get_users(array('role__in' => $staff_roles));
+        $threshold_time = time() - ($threshold_minutes * 60);
+        
+        foreach ($users as $user) {
+            $last_activity = get_user_meta($user->ID, 'last_activity', true);
+            if ($last_activity && $last_activity > $threshold_time) {
+                $online = true;
+                break; // Found an active staff member
+            }
+        }
+        
+        return $online ? 'online' : 'offline';
+    }
+
+    /**
+     * Update user last activity timestamp on relevant actions
+     */
+    public function update_user_last_activity() {
+        if (is_user_logged_in()) {
+            update_user_meta(get_current_user_id(), 'last_activity', time());
+        }
+    }
+
+    /**
+     * Add hooks for updating last activity
+     */
+    public function init_activity_tracking() {
+        add_action('wp_login', array($this, 'update_user_last_activity_on_login'), 10, 2);
+        add_action('admin_init', array($this, 'update_user_last_activity')); // Track admin activity
+        add_action('wp_ajax_heartbeat', array($this, 'update_user_last_activity'), 1); // Track heartbeat
+    }
+    
+    public function update_user_last_activity_on_login($user_login, $user) {
+        update_user_meta($user->ID, 'last_activity', time());
+    }
+
+    /**
      * AJAX handler for getting chatbot responses
      */
     public function handle_ajax_response() {
         // Verify nonce
         check_ajax_referer('bloobee_smartchat_nonce', 'nonce');
         
-        // Get message from request
-        $message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
+        $response_data = '';
+        $error_message = null;
         
-        if (empty($message)) {
-            wp_send_json_error(array('error' => __('Empty message', 'bloobee-smartchat')));
-            return;
+        try {
+            // Get message from request
+            $message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
+            
+            if (empty($message)) {
+                throw new Exception(__('Empty message', 'bloobee-smartchat'));
+            }
+            
+            // Get subject if provided
+            $subject = isset($_POST['subject']) ? sanitize_text_field($_POST['subject']) : '';
+            
+            // Get agent instance
+            $agent = Bloobee_Agent::get_instance();
+            
+            // Get response
+            $response_data = $agent->get_response($message, $subject);
+        
+        } catch (Exception $e) {
+            $error_message = $e->getMessage();
+            $response_data = __('Sorry, I encountered an error. Please try again later.', 'bloobee-smartchat'); // Generic error for user
         }
-        
-        // Get subject if provided
-        $subject = isset($_POST['subject']) ? sanitize_text_field($_POST['subject']) : '';
-        
-        // Get agent instance
-        $agent = Bloobee_Agent::get_instance();
-        
-        // Get response
-        $response = $agent->get_response($message, $subject);
         
         // Track conversation in analytics
         if (Bloobee_Settings::get_instance()->get_option('enable_analytics', true)) {
             $analytics = Bloobee_Analytics::get_instance();
-            $analytics->track_conversation($message, $response);
+            // Pass $error_message to track_conversation
+            $analytics->track_conversation($message, $response_data, $subject, 'neutral', $error_message); 
         }
         
-        wp_send_json_success(array('response' => $response));
+        // Send response (success or error)
+        if ($error_message) {
+             wp_send_json_error(array('error' => $response_data)); // Send generic error to user
+        } else {
+             wp_send_json_success(array('response' => $response_data));
+        }
     }
 
     /**

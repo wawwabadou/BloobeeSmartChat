@@ -68,6 +68,7 @@ class Bloobee_Analytics {
             subject varchar(100) DEFAULT NULL,
             sentiment varchar(20) DEFAULT NULL,
             ip_address varchar(45) NOT NULL,
+            error_message text DEFAULT NULL,
             created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             KEY user_id (user_id),
@@ -113,7 +114,7 @@ class Bloobee_Analytics {
     /**
      * Track conversation
      */
-    public function track_conversation($user_message, $bot_response, $subject = '', $sentiment = 'neutral') {
+    public function track_conversation($user_message, $bot_response, $subject = '', $sentiment = 'neutral', $error_message = null) {
         global $wpdb;
         
         // Get user ID from POST data or generate a new one
@@ -137,9 +138,10 @@ class Bloobee_Analytics {
                 'subject' => $subject,
                 'sentiment' => $sentiment,
                 'ip_address' => $ip_address,
+                'error_message' => $error_message,
                 'created_at' => current_time('mysql')
             ),
-            array('%s', '%s', '%s', '%s', '%s', '%s', '%s')
+            array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')
         );
     }
     
